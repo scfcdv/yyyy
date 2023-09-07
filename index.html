@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>YouTube Data API Example</title>
+  </head>
+  <body>
+    <div id="login-container" class="pre-auth">このアプリケーションでは、<button id="login-button" onclick="google.accounts.id.prompt()">YouTubeにログイン</button>しておすすめの動画を表示します。</div>
+    <div id="video-container"></div>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script type="text/javascript">
+      // ログインボタンをクリックしたときに呼び出される関数
+      function handleAuthorization(response) {
+        if (response && !response.error) {
+          // ログインが成功した場合
+          document.getElementById('login-container').style.display = 'none';
+          loadAPIClientInterfaces();
+        }
+      }
+
+      // YouTube Data APIをロードする関数
+      function loadAPIClientInterfaces() {
+        gapi.client.load('youtube', 'v3', function() {
+          getRecommendedVideos();
+        });
+      }
+
+      // おすすめの動画を取得する関数
+      function getRecommendedVideos() {
+        var request = gapi.client.youtube.activities.list({
+          home: true,
+          part: 'snippet',
+          maxResults: 5
+        });
+        request.execute(function(response) {
+          var videoContainer = document.getElementById('video-container');
+          response.items.forEach(function(item) {
+            var videoId = item.contentDetails.upload.videoId;
+            var videoTitle = item.snippet.title;
+            var videoThumbnail = item.snippet.thumbnails.default.url;
+            videoContainer.innerHTML += '<a href="https://www.youtube.com/watch?v=' + videoId + '"><img src="' + videoThumbnail + '">' + videoTitle + '</a><br>';
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
